@@ -419,7 +419,34 @@ void MyService::startCapture(::google::protobuf::RpcController* /*controller*/,
             continue;     //! \todo (LOW): partial RPC?
 
         portLock[portId]->lockForWrite();
-        portInfo[portId]->startCapture();
+        portInfo[portId]->startCapture(NULL);
+        portLock[portId]->unlock();
+    }
+
+    //! \todo (LOW): fill-in response "Ack"????
+
+    done->Run();
+}
+
+void MyService::startFilteredCapture(::google::protobuf::RpcController* /*controller*/,
+    const ::OstProto::FilteredPortIdList* request,
+    ::OstProto::Ack* /*response*/,
+    ::google::protobuf::Closure* done)
+{
+    qDebug("In %s", __PRETTY_FUNCTION__);
+
+    for (int i = 0; i < request->port_id_size(); i++)
+    {
+        int portId;
+	::std::string filter;
+
+        portId = request->port_id(i).id();
+	filter = request->port_id(i).filter();
+        if ((portId < 0) || (portId >= portInfo.size()))
+            continue;     //! \todo (LOW): partial RPC?
+
+        portLock[portId]->lockForWrite();
+        portInfo[portId]->startCapture(filter.c_str());
         portLock[portId]->unlock();
     }
 

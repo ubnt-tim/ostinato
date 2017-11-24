@@ -84,6 +84,10 @@ public:
         const ::OstProto::PortIdList* request,
         ::OstProto::Ack* response,
         ::google::protobuf::Closure* done);
+    virtual void startFilteredCapture(::google::protobuf::RpcController* controller,
+        const ::OstProto::FilteredPortIdList* request,
+        ::OstProto::Ack* response,
+        ::google::protobuf::Closure* done);
     virtual void stopCapture(::google::protobuf::RpcController* controller,
         const ::OstProto::PortIdList* request,
         ::OstProto::Ack* response,

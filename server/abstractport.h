@@ -103,7 +103,7 @@ public:
     virtual void stopTransmit() = 0;
     virtual bool isTransmitOn() = 0;
 
-    virtual void startCapture() = 0;
+    virtual void startCapture(const char *filter) = 0;
     virtual void stopCapture() = 0;
     virtual bool isCaptureOn() = 0;
     virtual QIODevice* captureData() = 0;

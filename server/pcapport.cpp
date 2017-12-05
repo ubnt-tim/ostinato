@@ -55,12 +55,12 @@ static long inline udiffTimeStamp(const TimeStamp *start, const TimeStamp *end)
 #elif defined(Q_OS_WIN32)
 static quint64 gTicksFreq;
 typedef LARGE_INTEGER TimeStamp;
-static void inline getTimeStamp(TimeStamp* stamp) 
+static void inline getTimeStamp(TimeStamp* stamp)
 {
     QueryPerformanceCounter(stamp);
 }
 
-static long inline udiffTimeStamp(const TimeStamp *start, const TimeStamp *end) 
+static long inline udiffTimeStamp(const TimeStamp *start, const TimeStamp *end)
 {
     if (end->QuadPart >= start->QuadPart)
         return (end->QuadPart - start->QuadPart)*long(1e6)/gTicksFreq;
@@ -271,14 +271,14 @@ _retry:
     return;
 
 _set_direction_error:
-    qDebug("Error setting direction(%d) %s: %s\n", direction, device, 
+    qDebug("Error setting direction(%d) %s: %s\n", direction, device,
             pcap_geterr(handle_));
     isDirectional_ = false;
     return;
 
 _open_error:
     qDebug("%s: Error opening port %s: %s\n", __FUNCTION__, device, errbuf);
-} 
+}
 
 PcapPort::PortMonitor::~PortMonitor()
 {
@@ -323,11 +323,11 @@ void PcapPort::PortMonitor::run()
                 //qDebug("%s: timeout. continuing ...", __PRETTY_FUNCTION__);
                 continue;
             case -1:
-                qWarning("%s: error reading packet (%d): %s", 
+                qWarning("%s: error reading packet (%d): %s",
                         __PRETTY_FUNCTION__, ret, pcap_geterr(handle_));
                 break;
             case -2:
-                qWarning("%s: error reading packet (%d): %s", 
+                qWarning("%s: error reading packet (%d): %s",
                         __PRETTY_FUNCTION__, ret, pcap_geterr(handle_));
                 break;
             default:
@@ -400,7 +400,7 @@ bool PcapPort::PortTransmitter::setRateAccuracy(
         qWarning("%s: rate accuracy set to Low - usleep", __FUNCTION__);
         break;
     default:
-        qWarning("%s: unsupported rate accuracy value %d", __FUNCTION__, 
+        qWarning("%s: unsupported rate accuracy value %d", __FUNCTION__,
                 accuracy);
         return false;
     }
@@ -421,7 +421,7 @@ void PcapPort::PortTransmitter::clearPacketList()
 
     returnToQIdx_ = -1;
 
-    setPacketListLoopMode(false, 0, 0); 
+    setPacketListLoopMode(false, 0, 0);
 }
 
 void PcapPort::PortTransmitter::loopNextPacketSet(qint64 size, qint64 repeats,
@@ -429,7 +429,7 @@ void PcapPort::PortTransmitter::loopNextPacketSet(qint64 size, qint64 repeats,
 {
     currentPacketSequence_ = new PacketSequence;
     currentPacketSequence_->repeatCount_ = repeats;
-    currentPacketSequence_->usecDelay_ = repeatDelaySec * long(1e6) 
+    currentPacketSequence_->usecDelay_ = repeatDelaySec * long(1e6)
                                             + repeatDelayNsec/1000;
 
     repeatSequenceStart_ = packetSequenceList_.size();
@@ -439,7 +439,7 @@ void PcapPort::PortTransmitter::loopNextPacketSet(qint64 size, qint64 repeats,
     packetSequenceList_.append(currentPacketSequence_);
 }
 
-bool PcapPort::PortTransmitter::appendToPacketList(long sec, long nsec, 
+bool PcapPort::PortTransmitter::appendToPacketList(long sec, long nsec,
         const uchar *packet, int length)
 {
     bool op = true;
@@ -449,17 +449,17 @@ bool PcapPort::PortTransmitter::appendToPacketList(long sec, long nsec,
     pktHdr.ts.tv_sec = sec;
     pktHdr.ts.tv_usec = nsec/1000;
 
-    if (currentPacketSequence_ == NULL || 
+    if (currentPacketSequence_ == NULL ||
             !currentPacketSequence_->hasFreeSpace(2*sizeof(pcap_pkthdr)+length))
     {
         if (currentPacketSequence_ != NULL)
         {
             long usecs;
 
-            usecs = (pktHdr.ts.tv_sec 
-                        - currentPacketSequence_->lastPacket_->ts.tv_sec) 
+            usecs = (pktHdr.ts.tv_sec
+                        - currentPacketSequence_->lastPacket_->ts.tv_sec)
                             * long(1e6);
-            usecs += (pktHdr.ts.tv_usec 
+            usecs += (pktHdr.ts.tv_usec
                         - currentPacketSequence_->lastPacket_->ts.tv_usec);
             currentPacketSequence_->usecDelay_ = usecs;
         }
@@ -485,7 +485,7 @@ bool PcapPort::PortTransmitter::appendToPacketList(long sec, long nsec,
         qDebug("repeatSequenceStart_=%d, repeatSize_ = %llu",
                 repeatSequenceStart_, repeatSize_);
 
-        // Set the packetSequence repeatSize 
+        // Set the packetSequence repeatSize
         Q_ASSERT(repeatSequenceStart_ >= 0);
         Q_ASSERT(repeatSequenceStart_ < packetSequenceList_.size());
 
@@ -495,13 +495,13 @@ bool PcapPort::PortTransmitter::appendToPacketList(long sec, long nsec,
 
             currentPacketSequence_->usecDelay_ = start->usecDelay_;
             start->usecDelay_ = 0;
-            start->repeatSize_ = 
+            start->repeatSize_ =
                     packetSequenceList_.size() - repeatSequenceStart_;
         }
 
         repeatSize_ = 0;
 
-        // End current pktSeq and trigger a new pktSeq allocation for next pkt 
+        // End current pktSeq and trigger a new pktSeq allocation for next pkt
         currentPacketSequence_ = NULL;
     }
 
@@ -532,7 +532,7 @@ void PcapPort::PortTransmitter::run()
     // 'coz of 2 reasons - there's no way of stopping it before all packets
     // in the sendQueue are sent out and secondly, stats are available only
     // when all packets have been sent - no periodic updates
-    // 
+    //
     // NOTE2: Transmit on the Rx Handle so that we can receive it back
     // on the Tx Handle to do stats
     //
@@ -549,12 +549,12 @@ void PcapPort::PortTransmitter::run()
         goto _exit;
 
     for(i = 0; i < packetSequenceList_.size(); i++) {
-        qDebug("sendQ[%d]: rptCnt = %d, rptSz = %d, usecDelay = %ld", i, 
-                packetSequenceList_.at(i)->repeatCount_, 
+        qDebug("sendQ[%d]: rptCnt = %d, rptSz = %d, usecDelay = %ld", i,
+                packetSequenceList_.at(i)->repeatCount_,
                 packetSequenceList_.at(i)->repeatSize_,
                 packetSequenceList_.at(i)->usecDelay_);
-        qDebug("sendQ[%d]: pkts = %ld, usecDuration = %ld", i, 
-                packetSequenceList_.at(i)->packets_, 
+        qDebug("sendQ[%d]: pkts = %ld, usecDuration = %ld", i,
+                packetSequenceList_.at(i)->packets_,
                 packetSequenceList_.at(i)->usecDuration_);
     }
 
@@ -579,7 +579,7 @@ _restart:
                 if (seq->usecDuration_ <= long(1e6)) // 1s
                 {
                     getTimeStamp(&ovrStart);
-                    ret = pcap_sendqueue_transmit(handle_, 
+                    ret = pcap_sendqueue_transmit(handle_,
                             seq->sendQueue_, kSyncTransmit);
                     if (ret >= 0)
                     {
@@ -587,7 +587,7 @@ _restart:
                         stats_->txBytes += seq->bytes_;
 
                         getTimeStamp(&ovrEnd);
-                        overHead += seq->usecDuration_ 
+                        overHead += seq->usecDuration_
                             - udiffTimeStamp(&ovrStart, &ovrEnd);
                         Q_ASSERT(overHead <= 0);
                     }
@@ -596,18 +596,18 @@ _restart:
                 }
                 else
                 {
-                    ret = sendQueueTransmit(handle_, seq->sendQueue_, 
+                    ret = sendQueueTransmit(handle_, seq->sendQueue_,
                             overHead, kSyncTransmit);
                 }
 #else
-                ret = sendQueueTransmit(handle_, seq->sendQueue_, 
+                ret = sendQueueTransmit(handle_, seq->sendQueue_,
                             overHead, kSyncTransmit);
 #endif
 
                 if (ret >= 0)
                 {
-                    long usecs = seq->usecDelay_ + overHead; 
-                    if (usecs > 0) 
+                    long usecs = seq->usecDelay_ + overHead;
+                    if (usecs > 0)
                     {
                         (*udelayFn_)(usecs);
                         overHead = 0;
@@ -773,7 +773,7 @@ void PcapPort::PortTransmitter::udelay(unsigned long usec)
     } while (timercmp(&now, &target, <));
 #else
     QThread::usleep(usec);
-#endif 
+#endif
 }
 
 /*
@@ -805,7 +805,10 @@ void PcapPort::PortCapturer::run()
 {
     int flag = PCAP_OPENFLAG_PROMISCUOUS;
     char errbuf[PCAP_ERRBUF_SIZE] = "";
-    
+    struct bpf_program fp;
+    bpf_u_int32 net, mask;
+    int looping = 0;
+
     qDebug("In %s", __PRETTY_FUNCTION__);
 
     if (!capFile_.isOpen())
@@ -813,15 +816,21 @@ void PcapPort::PortCapturer::run()
         qWarning("temp cap file is not open");
         goto _exit;
     }
+
+    if (-1 == pcap_lookupnet(device_.toAscii().constData(), &net, &mask,errbuf))
+    {
+        net = 0;
+        mask = 0;
+    }
 _retry:
-    handle_ = pcap_open_live(device_.toAscii().constData(), 65535, 
+    handle_ = pcap_open_live(device_.toAscii().constData(), 65535,
                     flag, 1000 /* ms */, errbuf);
 
     if (handle_ == NULL)
     {
         if (flag && QString(errbuf).contains("promiscuous"))
         {
-            qDebug("%s:can't set promiscuous mode, trying non-promisc", 
+            qDebug("%s:can't set promiscuous mode, trying non-promisc",
                     device_.toAscii().constData());
             flag = 0;
             goto _retry;
@@ -834,37 +843,51 @@ _retry:
         }
     }
 
-    dumpHandle_ = pcap_dump_open(handle_, 
+    if (-1 == pcap_compile(handle_, &fp, filter_.toAscii().constData(), 0, mask))
+    {
+            qDebug("%s:can't compile BPF program: %s (%s)",
+                    device_.toAscii().constData(),
+                    filter_.toAscii().constData(),
+                    pcap_geterr(handle_));
+            goto _exit;
+    }
+    if (-1 == pcap_setfilter(handle_, &fp))
+    {
+            qDebug("%s:can't apply filter: %s (%s)",
+                    device_.toAscii().constData(),
+                    filter_.toAscii().constData(),
+                    pcap_geterr(handle_));
+            goto _exit;
+    }
+    pcap_freecode(&fp);
+    pcap_setnonblock(handle_, 1, errbuf);
+
+    dumpHandle_ = pcap_dump_open(handle_,
             capFile_.fileName().toAscii().constData());
     state_ = kRunning;
-    while (1)
+    looping = 1;
+    while (looping)
     {
         int ret;
-        struct pcap_pkthdr *hdr;
-        const uchar *data;
 
-        ret = pcap_next_ex(handle_, &hdr, &data);
+        ret = pcap_loop(handle_, 1000, pcap_dump, (uchar *)dumpHandle_);
         switch (ret)
         {
-            case 1:
-                pcap_dump((uchar*) dumpHandle_, hdr, data);
-                break;
             case 0:
-                // timeout: just go back to the loop
+                // 1000 continuous packets processed, can do next 1000
                 break;
             case -1:
-                qWarning("%s: error reading packet (%d): %s", 
+                qWarning("%s: error reading packet (%d): %s",
                         __PRETTY_FUNCTION__, ret, pcap_geterr(handle_));
+                looping = 0;
                 break;
             case -2:
+                qDebug("user requested capture stop\n");
+                looping = 0;
+                break;
             default:
                 qFatal("%s: Unexpected return value %d", __PRETTY_FUNCTION__, ret);
-        }
-
-        if (stop_) 
-        {
-            qDebug("user requested capture stop\n");
-            break;
+                looping = 0;
         }
     }
     pcap_dump_close(dumpHandle_);
@@ -877,13 +900,14 @@ _exit:
     state_ = kFinished;
 }
 
-void PcapPort::PortCapturer::start()
+void PcapPort::PortCapturer::start(const char *filter)
 {
     // FIXME: return error
     if (state_ == kRunning) {
         qWarning("Capture start requested but is already running!");
         return;
     }
+    filter_ = QString::fromAscii(filter);
 
     state_ = kNotStarted;
     QThread::start();
@@ -896,8 +920,11 @@ void PcapPort::PortCapturer::stop()
 {
     if (state_ == kRunning) {
         stop_ = true;
-        while (state_ == kRunning)
-            QThread::msleep(10);
+        pcap_breakloop(handle_);
+        while (state_ == kRunning) {
+            qDebug("capture stoping...\n");
+            QThread::msleep(500);
+        }
     }
     else {
         // FIXME: return error

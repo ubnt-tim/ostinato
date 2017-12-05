@@ -65,7 +65,7 @@ public:
     virtual void stopTransmit()  { transmitter_->stop();  }
     virtual bool isTransmitOn() { return transmitter_->isRunning(); }
 
-    virtual void startCapture() { capturer_->start(); }
+    virtual void startCapture(const char *filter) { capturer_->start(filter); }
     virtual void stopCapture()  { capturer_->stop(); }
     virtual bool isCaptureOn()  { return capturer_->isRunning(); }
     virtual QIODevice* captureData() { return capturer_->captureFile(); }
@@ -210,7 +210,7 @@ protected:
         PortCapturer(const char *device);
         ~PortCapturer();
         void run();
-        void start();
+        void start(const char *filter);
         void stop();
         bool isRunning();
         QFile* captureFile();
@@ -229,6 +229,7 @@ protected:
         pcap_t          *handle_;
         pcap_dumper_t   *dumpHandle_;
         volatile State  state_;
+        QString         filter_;
     };
 
     class EmulationTransceiver: public QThread

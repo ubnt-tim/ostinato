@@ -185,6 +185,15 @@ message PortIdList {
     repeated PortId port_id = 1;
 }
 
+message FilteredPortId {
+    required uint32 id = 1;
+    required string filter = 2;
+}
+
+message FilteredPortIdList {
+    repeated FilteredPortId port_id = 1;
+}
+
 message StreamIdList {
     required PortId port_id = 1;
     repeated StreamId stream_id = 2;
@@ -358,5 +367,7 @@ service OstService {
     rpc resolveDeviceNeighbors(PortIdList) returns (Ack);
     rpc clearDeviceNeighbors(PortIdList) returns (Ack);
     rpc getDeviceNeighbors(PortId) returns (PortNeighborList);
+
+    rpc startFilteredCapture(FilteredPortIdList) returns (Ack);
 }
 
